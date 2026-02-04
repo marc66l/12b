@@ -17,7 +17,6 @@
             z-index: -1;
             background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
                         url('hatter.jpg');
-            /* A kép teteje és alja a kijelzőhöz igazodik */
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
@@ -28,11 +27,27 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Nincs görgetés az oldalon */
+            overflow: hidden;
             font-family: 'Roboto', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* Easter Egg üzenet stílusa */
+        #tap-message {
+            position: fixed;
+            top: 20%;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            display: none;
+            z-index: 2000;
+            font-weight: bold;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 2px solid white;
         }
 
         .container {
@@ -113,7 +128,7 @@
         textarea {
             width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px;
             box-sizing: border-box; font-family: inherit; margin-bottom: 12px;
-            resize: none; font-size: 16px;
+            resize: none; font-size: 15px;
         }
 
         .submit-btn {
@@ -151,14 +166,15 @@
 </head>
 <body>
 
-    <div class="background-layer"></div>
+    <div class="background-layer" onclick="handleBgClick()"></div>
+    <div id="tap-message">Ne böködj, fáj! 😠</div>
 
     <div class="container">
-        <h1>SZAVAZZ A 12.B-RE!</h1>
-        <span class="motto">Dávid a showman</span>
+        <h1>CSAK A 12.B!</h1>
+        <span class="motto">Válaszd a jövőt, válaszd a showmant!</span>
 
         <a href="instagram://user?username=david_a_showman" id="insta-link" class="btn btn-insta">
-            📸 Instagram Profilunk
+            📸 Ne maradj le semmiről!
         </a>
 
         <button class="btn btn-wish" onclick="toggleForm()">
@@ -167,22 +183,34 @@
 
         <div id="wish-form-container">
             <form id="my-form" action="https://formspree.io/f/mgozggbr" method="POST">
-                <p style="margin: 0 0 10px 0; font-weight: bold;">Mi legyen az iskolában?</p>
-                <textarea name="message" id="message-text" rows="4" placeholder="Írd le az ötleted..." required></textarea>
-                <button type="submit" id="submit-button" class="submit-btn">Küldés</button>
+                <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 18px;">Mit intézzünk el?</p>
+                <textarea name="message" id="message-text" rows="4" 
+                placeholder="Osztály, tantárgy, tanár neve, hanyadik óra..." required></textarea>
+                <button type="submit" id="submit-button" class="submit-btn">Intézd el!</button>
             </form>
         </div>
     </div>
 
     <div id="success-overlay">
         <div class="success-card">
-            <h2>✓ SIKER!</h2>
-            <p>A kívánság küldése sikeres volt,<br>12.B dolgozik az ügyön!</p>
-            <button onclick="closeModal()" class="submit-btn" style="background:#27ae60; margin-top:10px;">Rendben</button>
+            <h2>✓ VETTÜK!</h2>
+            <p>Üzenet célba ért.<br>A 12.B már intézkedik!</p>
+            <button onclick="closeModal()" class="submit-btn" style="background:#27ae60; margin-top:10px;">Vissza</button>
         </div>
     </div>
 
     <script>
+        let bgClicks = 0;
+        function handleBgClick() {
+            bgClicks++;
+            if (bgClicks >= 10) {
+                const msg = document.getElementById('tap-message');
+                msg.style.display = 'block';
+                bgClicks = 0;
+                setTimeout(() => { msg.style.display = 'none'; }, 2000);
+            }
+        }
+
         document.getElementById('insta-link').onclick = function(e) {
             var start = Date.now();
             setTimeout(function() {
@@ -207,7 +235,7 @@
             var btn = document.getElementById("submit-button");
             var data = new FormData(event.target);
             btn.disabled = true;
-            btn.innerText = "Küldés folyamatban...";
+            btn.innerText = "Küldés...";
 
             fetch(event.target.action, {
                 method: form.method,
@@ -225,16 +253,14 @@
                     form.reset();
                     toggleForm();
                     btn.disabled = false;
-                    btn.innerText = "Küldés";
+                    btn.innerText = "Intézd el!";
                 } else {
                     alert("Hiba történt!");
                     btn.disabled = false;
-                    btn.innerText = "Küldés";
                 }
             }).catch(error => {
                 alert("Nincs internet!");
                 btn.disabled = false;
-                btn.innerText = "Küldés";
             });
         }
         form.addEventListener("submit", handleSubmit);
