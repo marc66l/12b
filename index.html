@@ -2,37 +2,45 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Szavazz a 12.B-re!</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body {
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
+            /* Megakadályozza a görgetést és a "rángatást" */
+            overflow: hidden; 
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                        url('https://images.unsplash.com/photo-1541339907198-e08756defe93?auto=format&fit=crop&w=800&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            /* GOOGLE DRIVE KÉP: Az ID-t cseréld ki az url végén! */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://drive.google.com/uc?export=view&id=IDE_IRD_BE_A_FILE_ID_T');
+            /* Képbeállítások: nem nyúlik, kitölti a képernyőt, az alja és teteje fix */
+            background-size: cover;
+            background-position: center bottom; 
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
+        /* Minden más marad az eredeti, csak a container méretén finomítottam a fix nézethez */
         .container {
             width: 85%;
             max-width: 400px;
             text-align: center;
             background: rgba(0, 0, 0, 0.8);
-            padding: 35px 20px;
+            padding: 30px 20px;
             border-radius: 30px;
             border: 2px solid #ffd700;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* Biztosítja, hogy ne lógjon ki a fix képernyőből */
+            max-height: 90vh;
+            overflow-y: auto; 
         }
 
         h1 {
@@ -49,9 +57,9 @@
             display: block;
             font-size: 14px;
             opacity: 0.9;
+            color: white;
         }
 
-        /* LÜKTETŐ ANIMÁCIÓ A GOMBOKRA */
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
             70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
@@ -79,7 +87,6 @@
 
         .btn-insta { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
         .btn-wish { background-color: #27ae60; animation-delay: 0.5s; }
-
         .btn:hover { animation: none; transform: translateY(-3px); }
 
         #wish-form-container {
@@ -173,7 +180,6 @@
     </div>
 
     <script>
-        // Instagram App nyitás kezelő
         document.getElementById('insta-link').onclick = function(e) {
             var start = Date.now();
             setTimeout(function() {
@@ -186,9 +192,6 @@
         function toggleForm() {
             var formDiv = document.getElementById("wish-form-container");
             formDiv.style.display = (formDiv.style.display === "block") ? "none" : "block";
-            if(formDiv.style.display === "block") {
-                formDiv.scrollIntoView({behavior: "smooth"});
-            }
         }
 
         function closeModal() {
@@ -196,12 +199,10 @@
         }
 
         var form = document.getElementById("my-form");
-        
         async function handleSubmit(event) {
             event.preventDefault();
             var btn = document.getElementById("submit-button");
             var data = new FormData(event.target);
-            
             btn.disabled = true;
             btn.innerText = "Küldés folyamatban...";
 
@@ -211,26 +212,24 @@
                 headers: { 'Accept': 'application/json' }
             }).then(response => {
                 if (response.ok) {
-                    // KONFETTI EFFEKT
                     confetti({
                         particleCount: 150,
                         spread: 70,
                         origin: { y: 0.6 },
                         colors: ['#ffd700', '#ffffff', '#27ae60']
                     });
-
                     document.getElementById("success-overlay").style.display = "flex";
                     form.reset();
                     toggleForm();
                     btn.disabled = false;
                     btn.innerText = "Küldés";
                 } else {
-                    alert("Hiba történt! Próbáld újra később.");
+                    alert("Hiba történt!");
                     btn.disabled = false;
                     btn.innerText = "Küldés";
                 }
             }).catch(error => {
-                alert("Nincs internetkapcsolat!");
+                alert("Nincs internet!");
                 btn.disabled = false;
                 btn.innerText = "Küldés";
             });
