@@ -182,7 +182,7 @@
         </button>
 
         <div id="wish-form-container">
-            <form id="my-form" action="https://formspree.io/f/mgozggbr" method="POST">
+            <form id="my-form">
                 <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 18px;">Mit intézzünk el?</p>
                 <textarea name="message" id="message-text" rows="4" 
                 placeholder="Osztály, tantárgy, tanár neve, hányadik óra stb..." required></textarea>
@@ -200,6 +200,9 @@
     </div>
 
     <script>
+        // GOOGLE SCRIPT URL BEÁLLÍTÁSA
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwcj-Sd5-4rr31MG86cSo-NNNt82G-6LzzbaeOhnh4Gc_shxD6q_tDyNwYeTE9PEAXN-A/exec';
+
         let bgClicks = 0;
         function handleBgClick() {
             bgClicks++;
@@ -229,41 +232,40 @@
             document.getElementById("success-overlay").style.display = "none";
         }
 
-        var form = document.getElementById("my-form");
-        async function handleSubmit(event) {
-            event.preventDefault();
+        const form = document.getElementById("my-form");
+        form.addEventListener("submit", e => {
+            e.preventDefault();
             var btn = document.getElementById("submit-button");
-            var data = new FormData(event.target);
             btn.disabled = true;
             btn.innerText = "Küldés...";
 
-            fetch(event.target.action, {
-                method: form.method,
-                body: data,
-                headers: { 'Accept': 'application/json' }
-            }).then(response => {
-                if (response.ok) {
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#ffd700', '#ffffff', '#27ae60']
-                    });
-                    document.getElementById("success-overlay").style.display = "flex";
-                    form.reset();
-                    toggleForm();
-                    btn.disabled = false;
-                    btn.innerText = "Intézd el!";
-                } else {
-                    alert("Hiba történt!");
-                    btn.disabled = false;
-                }
-            }).catch(error => {
-                alert("Nincs internet!");
+            // Küldés Google Apps Script felé (POST metódussal)
+            fetch(scriptURL, { 
+                method: 'POST', 
+                mode: 'no-cors', // Emiatt nem fogunk látni választ, de az adat megérkezik
+                body: new FormData(form)
+            })
+            .then(() => {
+                // Mivel 'no-cors' módban vagyunk, feltételezzük a sikert
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ffd700', '#ffffff', '#27ae60']
+                });
+                document.getElementById("success-overlay").style.display = "flex";
+                form.reset();
+                toggleForm();
                 btn.disabled = false;
+                btn.innerText = "Intézd el!";
+            })
+            .catch(error => {
+                console.error('Hiba!', error);
+                alert("Hiba történt a küldés során!");
+                btn.disabled = false;
+                btn.innerText = "Intézd el!";
             });
-        }
-        form.addEventListener("submit", handleSubmit);
+        });
     </script>
 </body>
 </html>
